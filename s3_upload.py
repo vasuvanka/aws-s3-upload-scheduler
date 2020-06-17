@@ -13,28 +13,27 @@ class S3Upload(object):
 
     def start(self):
         for p in os.listdir(path=self.path):
-            xp = self.path+"/"+p
+            xp = os.path.join(self.path, p)
             if os.path.isdir(xp) and "_backedup_" not in p:
                 success = self.read_dir(xp)
                 if success:
-                    os.rename(xp, self.path + "/_backedup_" + p)
+                    os.rename(xp, os.path.join(self.path, "_backedup_" + p))
             elif os.path.isfile(xp) and "_backedup_" not in p:
                 success = self.create_s3_file(xp, p)
                 if success:
-                    os.rename(xp, self.path + "/_backedup_" + p)
-        return True
+                    os.rename(xp, os.path.join(self.path, "_backedup_" + p))
 
     def read_dir(self, path):
         for p in os.listdir(path=path):
-            xp = path+"/"+p
+            xp = os.path.join(self.path, p)
             if os.path.isdir(xp) and "_backedup_" not in p:
                 success = self.read_dir(xp)
                 if success:
-                    os.rename(xp, path + "/_backedup_" + p)
+                    os.rename(xp, os.path.join(path, "_backedup_" + p))
             elif os.path.isfile(xp) and "_backedup_" not in p:
                 success = self.create_s3_file(xp, p)
                 if success:
-                    os.rename(xp, path + "/_backedup_" + p)
+                    os.rename(xp, os.path.join(path, "_backedup_" + p))
         return True
 
     def create_s3_file(self, path, name):
@@ -42,7 +41,7 @@ class S3Upload(object):
             with open(path, "rb") as f:
                 self.s3.upload_fileobj(f, self.bucket_name, path, ExtraArgs={
                     'Metadata': {'name': name}})
-                logging.info("file uploaded with name : {}", format(name))
+                logging.info("file uploaded with name : {}".format(name))
         except ClientError as e:
             logging.error(e)
             return False
